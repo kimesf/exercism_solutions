@@ -1,35 +1,50 @@
+require 'forwardable'
+
 class Triangle
-  TYPES_BY_DIFFERENT_LENGTH_SIDES = {
-    equilateral: [:==, 1],
-    isosceles: [:<=, 2],
-    scalene: [:==, 3]
-  }.freeze
+  extend Forwardable
 
-  INEQUALITY_RULES = {
-    length: ->(sides_lenghts) { sides_lenghts.max < sides_lenghts.sum - sides_lenghts.max }
-  }.freeze
+  class InequalityRulesValidation
+    private
 
-  private_constant :INEQUALITY_RULES, :TYPES_BY_DIFFERENT_LENGTH_SIDES
+    attr_reader :lengths
+
+    def initialize(lengths)
+      @lengths = lengths
+    end
+
+    def length?
+      larger = lengths.max
+
+      larger < lengths.sum - larger
+    end
+
+    public
+
+    def valid?
+      length?
+    end
+  end
+
+  private_constant :InequalityRulesValidation
 
   private
 
-  attr_reader :sides_length
+  attr_reader :lengths
 
-  def initialize(sides_length)
-    @sides_length = sides_length
+  def initialize(lengths)
+    @lengths = lengths
+    @validation = InequalityRulesValidation.new(lengths)
   end
 
-  def sides_with_same_length_count
-    sides_length.uniq.count
-  end
-
-  def valid?
-    INEQUALITY_RULES[:length].call(sides_length)
-  end
+  def_delegators :@validation, :valid?
 
   public
 
-  TYPES_BY_DIFFERENT_LENGTH_SIDES.each do |name, rule|
-    define_method(:"#{name}?") { valid? && sides_with_same_length_count.public_send(*rule) }
+  {
+    equilateral?: [:==, 1],
+    isosceles?: [:<=, 2],
+    scalene?: [:==, 3]
+  }.each do |name, rule|
+    define_method(name) { valid? && lengths.uniq.count.public_send(*rule) }
   end
 end

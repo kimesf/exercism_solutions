@@ -1,41 +1,29 @@
 class Anagram
   private
 
-  attr_reader :actual_nominee,
-              :actual_reference,
-              :comparable_nominee,
-              :comparable_reference
-
   def initialize(word)
-    normalize(word, :@actual_reference, :@comparable_reference)
+    @insensitive_word = word.downcase
+    @letters = insensitive_word.chars.sort
   end
 
-  def normalize(word, actual, comparable)
-    word = word.downcase
-
-    instance_variable_set(actual, word)
-    instance_variable_set(comparable, word.chars.sort)
+  def ==(other)
+    insensitive_word == other.insensitive_word
   end
 
-  def different_word?
-    actual_nominee != actual_reference
-  end
-
-  def same_letters?
-    comparable_nominee == comparable_reference
-  end
-
-  def nominee_anagram_to_reference?
-    different_word? && same_letters?
+  def =~(other)
+    self != other &&
+      letters == other.letters
   end
 
   public
 
+  attr_reader :letters, :insensitive_word
+
   def match(words_ary)
     words_ary.filter do |word|
-      normalize(word, :@actual_nominee, :@comparable_nominee)
+      nominee = self.class.new(word)
 
-      nominee_anagram_to_reference?
+      self =~ nominee
     end
   end
 end
