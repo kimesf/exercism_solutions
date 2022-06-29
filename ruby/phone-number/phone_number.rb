@@ -20,6 +20,14 @@ class PhoneNumber
 
   def self.clean(dirty_number)= new(dirty_number).number
 
+  def number
+    return unless valid_length? &&
+                  valid_i18n_code? &&
+                  valid_first_digits?
+
+    digits.last(10).join
+  end
+
   private
 
   attr_reader :digits, :i18n_code, :area_code, :local_number, :length
@@ -50,15 +58,5 @@ class PhoneNumber
 
   def valid_first_digits?
     [area_code, local_number].all? { |numbers| NANP[:allowed_first_digits].include?(numbers.first) }
-  end
-
-  public
-
-  def number
-    return unless valid_length? &&
-                  valid_i18n_code? &&
-                  valid_first_digits?
-
-    digits.last(10).join
   end
 end
