@@ -1,31 +1,19 @@
-require 'forwardable'
+module InequalityRulesValidation
+  private
 
-class Triangle
-  extend Forwardable
-
-  class InequalityRulesValidation
-    private
-
-    attr_reader :lengths
-
-    def initialize(lengths)
-      @lengths = lengths
-    end
-
-    def length?
-      larger = lengths.max
-
-      larger < lengths.sum - larger
-    end
-
-    public
-
-    def valid?
-      length?
-    end
+  def valid?
+    length?
   end
 
-  private_constant :InequalityRulesValidation
+  def length?
+    larger = lengths.max
+
+    larger < lengths.sum - larger
+  end
+end
+
+class Triangle
+  include InequalityRulesValidation
 
   private
 
@@ -33,10 +21,7 @@ class Triangle
 
   def initialize(lengths)
     @lengths = lengths
-    @validation = InequalityRulesValidation.new(lengths)
   end
-
-  def_delegators :@validation, :valid?
 
   public
 
