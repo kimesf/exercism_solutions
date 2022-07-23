@@ -1,5 +1,5 @@
 class Allergies
-  BY_INDEX = %w[
+  DB_BY_INDEX = %w[
     eggs
     peanuts
     shellfish
@@ -10,52 +10,44 @@ class Allergies
     cats
   ]
 
-  private_constant :BY_INDEX
+  private_constant :DB_BY_INDEX
 
-  def list
-    me
-  end
+  def list = me
 
-  def allergic_to?(something)
-    me.include?(something)
-  end
+  def allergic_to?(something) = me.include?(something)
 
   private
 
-  attr_reader :score_base2, :me
+  attr_reader :me
 
   def initialize(score)
-    score_base2 = Number.new(score).base2_reversed_ary
-    indexes     = score_to_indexes(score_base2)
+    ids = ScoreTranslator.new(score).ids
 
-    @me = find_allergies(indexes)
+    @me = get_allergies(ids)
   end
 
-  def score_to_indexes(score_base2)
-    score_base2
-      .each_with_index
-      .filter_map { |binary, index| index if binary.nonzero? }
+  def get_allergies(ids)
+    ids.filter_map { |id| get_allergy(id) }
   end
 
-  def find_allergies(indexes)
-    indexes.filter_map { |index| allergy_at(index) }
-  end
+  def get_allergy(id) = DB_BY_INDEX[id]
 
-  def allergy_at(index)
-    BY_INDEX[index]
-  end
+  ScoreTranslator = Struct.new(:me) do
+    def ids = indexes_where_binary_true(binary_representation)
 
-  Number = Struct.new(:me) do
-    def base2_reversed_ary
-      num = me
-      digits = []
+    private
 
-      while num.positive?
-        digits << num % 2
-        num /= 2
-      end
+    def binary_representation
+      me
+        .to_s(2)
+        .chars
+        .reverse
+    end
 
-      digits
+    def indexes_where_binary_true(binary_list)
+      binary_list
+        .each_with_index
+        .filter_map { |char, index| index if char == '1' }
     end
   end
 end
