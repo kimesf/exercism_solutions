@@ -71,6 +71,12 @@ class MatchingBracketsTest < Minitest::Test
     refute Brackets.paired?('[({}])')
   end
 
+  def test_wrong_nested_edge_case
+    skip
+    # added for edge case
+    refute Brackets.paired?('([{]})')
+  end
+
   def test_paired_and_incomplete_brackets
     skip
     refute Brackets.paired?('{}[')
