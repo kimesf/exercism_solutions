@@ -1,3 +1,4 @@
+# Code example for https://github.com/exercism/problem-specifications/pull/2071
 class Brackets
   REGEX = {
     brackets: /[(){}\[\]]/
@@ -19,6 +20,27 @@ class Brackets
 
   def self.paired?(phrase)
     new(phrase).paired?
+  end
+
+  def paired?
+    brackets.each do |bracket|
+      case bracket
+      when '{' then count[:braces] += 1
+      when '}' then count[:braces] -= 1
+      when '(' then count[:parentheses] += 1
+      when ')' then count[:parentheses] -= 1
+      when '[' then count[:square_brackets] += 1
+      when ']' then count[:square_brackets] -= 1
+      end
+
+      break if closes_unopened?
+      break if closes_wrong?(bracket)
+
+      @last_opened_bracket = nil     if closes_last_opened?(bracket)
+      @last_opened_bracket = bracket if opener?(bracket)
+    end
+
+    count.values.all?(&:zero?)
   end
 
   private
@@ -45,27 +67,4 @@ class Brackets
   def opener?(bracket) = OPENERS.include?(bracket)
 
   def closes_last_opened?(bracket) = bracket == TYPES[last_opened_bracket]
-
-  public
-
-  def paired?
-    brackets.each do |bracket|
-      case bracket
-      when '{' then count[:braces] += 1
-      when '}' then count[:braces] -= 1
-      when '(' then count[:parentheses] += 1
-      when ')' then count[:parentheses] -= 1
-      when '[' then count[:square_brackets] += 1
-      when ']' then count[:square_brackets] -= 1
-      end
-
-      break if closes_unopened?
-      break if closes_wrong?(bracket)
-
-      @last_opened_bracket = nil     if closes_last_opened?(bracket)
-      @last_opened_bracket = bracket if opener?(bracket)
-    end
-
-    count.values.all?(&:zero?)
-  end
 end
